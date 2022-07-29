@@ -1,0 +1,393 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>Examples of Numerical Approximation of the Inverse Laplace Transform</title><meta name="generator" content="MATLAB 8.0"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2012-10-26"><meta name="DC.source" content="example_inversions.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img { margin-bottom:0px; } 
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, tt, code { font-size:12px; }
+pre { margin:0px 0px 20px; }
+pre.error { color:red; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h1>Examples of Numerical Approximation of the Inverse Laplace Transform</h1><!--introduction--><p>This script demonstrates using the included Talbot and Euler algorithms for numerical approximations of the inverse Laplace transform. The examples cover functions with known inverses so that the accuracy can easily be assessed.</p><p>Note that two versions of each algorithm are included, e.g. talbot_inversion.m and talbot_inversion_sym.m. The "_sym" suffix denotes that these functions use variable precision arithmetic, available in the Symbolic Toolbox&#8482;, for much, much greater precision. This is demonstrated below.</p><pre>Tucker McClure @ The MathWorks
+Copyright 2012, The MathWorks, Inc.</pre><!--/introduction--><h2>Contents</h2><div><ul><li><a href="#1">Clear</a></li><li><a href="#2">Step</a></li><li><a href="#3">Ramp</a></li><li><a href="#4">Exponentially Decaying Sine</a></li><li><a href="#5">Natural Logarithm</a></li><li><a href="#6">T = 0</a></li><li><a href="#7">Sine and Using "M"</a></li><li><a href="#8">Cosine and Low M</a></li><li><a href="#9">Cosine and Good M Selection</a></li><li><a href="#10">Cosine and Large M Difficulty with Double Precision</a></li><li><a href="#11">Cosine and Large M Accuracy with Variable Precision Arithmetic</a></li><li><a href="#13">Appendix</a></li></ul></div><h2>Clear<a name="1"></a></h2><pre class="codeinput">close <span class="string">all</span>; clear <span class="string">all</span>; clc;
+</pre><h2>Step<a name="2"></a></h2><p>A step function is simply 1/s. We can compare the numerical results to the exact results.</p><pre class="codeinput"><span class="comment">% First, define an anonymous function for our function of s. This could</span>
+<span class="comment">% also be a handle to a function stored in a .m file. E.g., if I had a</span>
+<span class="comment">% function called my_step.m, the below could be "fun = @my_step". If this</span>
+<span class="comment">% doesn't look familiar, check out "Function Handles" and "Anonymous</span>
+<span class="comment">% Functions" in the MATLAB documentation.</span>
+fun = @(s) 1/s;
+
+<span class="comment">% Define the times at which we want the inverse Laplace transform</span>
+<span class="comment">% evaluated.</span>
+time = [1 10 100 1000 10000]';
+
+<span class="comment">% Just call one of the included functions. We'll try Talbot's algorithm.</span>
+talbot_inversion(fun, time)'
+
+<span class="comment">% We could try the Euler method as well and will get (very, very close to)</span>
+<span class="comment">% the same results.</span>
+euler_inversion(fun, time)'
+</pre><pre class="codeoutput">
+ans =
+
+    1.0000    1.0000    1.0000    1.0000    1.0000
+
+
+ans =
+
+    1.0000    1.0000    1.0000    1.0000    1.0000
+
+</pre><h2>Ramp<a name="3"></a></h2><p>Let's try a simple ramp with more compact notation, defining directly in the call to <tt>talbot_inversion</tt> both the function and the times at which we want the function evaluated.</p><pre class="codeinput">talbot_inversion(@(s) 1/s^2, [1 10 100 1000 10000])'
+</pre><pre class="codeoutput">
+ans =
+
+   1.0e+04 *
+
+    0.0001    0.0010    0.0100    0.1000    1.0000
+
+</pre><h2>Exponentially Decaying Sine<a name="4"></a></h2><p>Let's plot the results along with the theoretical values for an exponentially decaying sine function.</p><pre class="codeinput">t = 0.05:0.05:5;
+a = 2;
+w = 2*pi;
+plot(t, exp(-a*t) .* sin(w*t), <span class="keyword">...</span>
+     t, euler_inversion(@(s) w/((s+a)^2+w^2), t), <span class="string">'.'</span>);
+xlabel(<span class="string">'Time'</span>);
+title(<span class="string">'f(t) = e^{-2 t} sin(\pi t) from f(s) = \pi/((s+2)^2+\pi^2)'</span>);
+legend(<span class="string">'Known Function'</span>, <span class="string">'Approximation'</span>);
+</pre><img vspace="5" hspace="5" src="example_inversions_01.png" alt=""> <h2>Natural Logarithm<a name="5"></a></h2><p>We can try a natural logarithm too.</p><pre class="codeinput">t = 0.05:0.05:2;
+gamma = 0.5772156649015328606065120900824024;
+plot(t, log(t), <span class="keyword">...</span>
+     t, talbot_inversion(@(s) -1/s*(log(s) + gamma), t), <span class="string">'.'</span>);
+xlabel(<span class="string">'Time'</span>);
+title(<span class="string">'f(t) = ln(t) from f(s) = (ln(s) + \gamma)/s'</span>);
+legend(<span class="string">'Known Function'</span>, <span class="string">'Approximation'</span>);
+</pre><img vspace="5" hspace="5" src="example_inversions_02.png" alt=""> <h2>T = 0<a name="6"></a></h2><p>Inverse Laplace transforms aren't defined for t = 0, but only t &gt; 0.</p><pre class="codeinput">talbot_inversion(@(s) 1/s, 0)
+</pre><pre class="codeoutput">
+ans =
+
+   NaN
+
+</pre><h2>Sine and Using "M"<a name="7"></a></h2><p>Sine oscillates and is a bit trickier on these algorithms, but it works fine here. We specify an "M" parameter -- a higher M yields higher resolution, but if M gets too high, there can be problems. Here we'll use M = 32, and pass this as the third argument to <tt>euler_inversion</tt>.</p><pre class="codeinput">t = 0.1:0.1:2*pi;
+w = pi;
+results = euler_inversion(@(s) w/(s^2+w^2), t, 32);
+plot(t, sin(w*t), <span class="keyword">...</span>
+     t, results, <span class="string">'.'</span>);
+xlabel(<span class="string">'Time'</span>); title(<span class="string">'f(t) = sin(\pi t) from f(s) = \pi/(s^2+\pi^2)'</span>);
+legend(<span class="string">'Known Function'</span>, <span class="string">'Approximation'</span>);
+</pre><img vspace="5" hspace="5" src="example_inversions_03.png" alt=""> <h2>Cosine and Low M<a name="8"></a></h2><p>When M isn't high enough, we see numerical problems.</p><pre class="codeinput">t = 0.05:0.05:3*pi;
+w = pi;
+results = talbot_inversion(@(s) s/(s^2+w^2), t, 16);
+plot(t, cos(w*t), <span class="keyword">...</span>
+     t, results, <span class="string">'.'</span>);
+axis([t(1) t(end) -2 2]);
+xlabel(<span class="string">'Time'</span>); title(<span class="string">'f(t) = cos(\pi t) from f(s) = s/(s^2+\pi^2)'</span>);
+legend(<span class="string">'Known Function'</span>, <span class="string">'Approximation'</span>);
+</pre><img vspace="5" hspace="5" src="example_inversions_04.png" alt=""> <h2>Cosine and Good M Selection<a name="9"></a></h2><p>Increasing M allows us to increase the number of periods we can compute.</p><pre class="codeinput">t = 0.05:0.05:3*pi;
+w = pi;
+results = talbot_inversion(@(s) s/(s^2+w^2), t, 64);
+plot(t, cos(w*t), <span class="keyword">...</span>
+     t, results, <span class="string">'.'</span>);
+axis([t(1) t(end) -2 2]);
+xlabel(<span class="string">'Time'</span>); title(<span class="string">'f(t) = cos(\pi t) from f(s) = s/(s^2+\pi^2)'</span>);
+legend(<span class="string">'Known Function'</span>, <span class="string">'Approximation'</span>);
+</pre><img vspace="5" hspace="5" src="example_inversions_05.png" alt=""> <h2>Cosine and Large M Difficulty with Double Precision<a name="10"></a></h2><p>We can't just set M arbitrarily high because the numerical precision required is greater than what doubles can provide.</p><pre class="codeinput">t = 0.05:0.05:3*pi;
+w = pi;
+results = talbot_inversion(@(s) s/(s^2+w^2), t, 92);
+plot(t, cos(w*t), <span class="keyword">...</span>
+     t, results, <span class="string">'.'</span>);
+axis([t(1) t(end) -2 2]);
+xlabel(<span class="string">'Time'</span>); title(<span class="string">'f(t) = cos(\pi t) from f(s) = s/(s^2+\pi^2)'</span>);
+legend(<span class="string">'Known Function'</span>, <span class="string">'Approximation'</span>);
+</pre><img vspace="5" hspace="5" src="example_inversions_06.png" alt=""> <h2>Cosine and Large M Accuracy with Variable Precision Arithmetic<a name="11"></a></h2><p>Here, we need cosine calculated out very far. This is not possible with doubles. Therefore, we use the symbolic implementation of Talbot's method (the version that ends with "_sym") and simply specify the required M. The symbolic implementations are capable of <b>arbitrary</b> precision by using the "vpa" function. Note that this takes <b>much</b> longer but might be the only way to solve some problems. Variable precision arithmetic (and therefore this function) requires the Symbolic Toolbox.</p><pre class="codeinput">t = 0.1:0.1:6*pi;
+w = pi;
+tic; <span class="comment">% Start a timer.</span>
+results = talbot_inversion_sym(@(s) s/(s^2+w^2), t, 128);
+toc; <span class="comment">% Stop a timer.</span>
+plot(t, cos(w*t), <span class="keyword">...</span>
+     t, results, <span class="string">'.'</span>);
+axis([t(1) t(end) -2 2]);
+xlabel(<span class="string">'Time'</span>); title(<span class="string">'f(t) = cos(\pi t) from f(s) = s/(s^2+\pi^2)'</span>);
+legend(<span class="string">'Known Function'</span>, <span class="string">'Approximation'</span>);
+</pre><pre class="codeoutput">Elapsed time is 75.112335 seconds.
+</pre><img vspace="5" hspace="5" src="example_inversions_07.png" alt=""> <p>That's it! If you have any arbitrary function derived in <tt>s</tt>, you can use these methods to determine its response over time.</p><h2>Appendix<a name="13"></a></h2><p>For most realistic, difficult problems that people address, it's likely that the symbolic implementations are the best resource, despite the increased run time. These implementations are possible primarily due to the use of the <tt>vpa</tt> function mentioned above. How does this work? Let's suppose we want to use the binomial theorem for some very large numbers. This involves large factorials. For n choose k with normal double precision, we get:</p><pre class="codeinput">n = 200;
+k = 199;
+factorial(n)/(factorial(k)*factorial(n-k))
+</pre><pre class="codeoutput">
+ans =
+
+   NaN
+
+</pre><p>NaN! The calculation breaks down with huge products on top and bottom, resulting in numerical noise when using double precision. But instead let's make these numbers <i>symbolic</i>. Then the factorials can be carried out symbolically, allowing common terms on top and bottom to be canceled out. Then we can evaluate at the very end to the desired precision. (The binomial coefficients calculation here will result in an integer, so we won't actually see 32 significant digits because everything after the decimal will be 0), but we do get precisely 200, without round-off errors.</p><pre class="codeinput">n = sym(200);
+k = sym(199);
+vpa(factorial(n)/(factorial(k)*factorial(n-k)), 32)
+</pre><pre class="codeoutput"> 
+ans =
+ 
+200.0
+ 
+</pre><p>That worked as expected. The <tt>vpa</tt> function is actually used on binomial coefficients in <tt>euler_inversion_sym</tt> for precisely this type of exact answer, albeit in a more complicated equation. Here's a snippet of <tt>euler_inversion_sym</tt>, showing the use of <tt>vpa</tt> to evaluate code handled symbolically. Note that this uses vectorization, complex numbers, and even the <tt>mod</tt> operator, and this can all be handled symbolically gracefully!</p><pre>   % Binominal function
+   bnml = @(n, z) factorial(n)/(factorial(z)*factorial(n-z));</pre><pre>   xi = sym([0.5, ones(1, M), zeros(1, M-1), 2^-sym(M)]);
+   for k = 1:M-1
+       xi(2*M-k + 1) = xi(2*M-k + 2) + 2^-sym(M) * bnml(sym(M), sym(k));
+   end
+   k = sym(0:2*M); % Iteration index
+   beta = vpa(sym(M)*log(sym(10))/3 + 1i*pi*k, P);
+   eta  = vpa((1-mod(k, 2)*2) .* xi, P);</pre><p>If you wish to understand these methods in more detail, be sure to look at this great summary of these techniques.</p><p>Abate, Joseph, and Ward Whitt. "A Unified Framework for Numerically Inverting Laplace Transforms." INFORMS Journal of Computing, vol. 18.4 (2006): 408-421. Print.</p><p class="footer"><br><a href="http://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2012b</a><br></p></div><!--
+##### SOURCE BEGIN #####
+%% Examples of Numerical Approximation of the Inverse Laplace Transform
+%
+% This script demonstrates using the included Talbot and Euler algorithms
+% for numerical approximations of the inverse Laplace transform. The
+% examples cover functions with known inverses so that the accuracy can
+% easily be assessed.
+%
+% Note that two versions of each algorithm are included, e.g.
+% talbot_inversion.m and talbot_inversion_sym.m. The "_sym" suffix denotes
+% that these functions use variable precision arithmetic, available in the
+% Symbolic Toolbox(TM), for much, much greater precision. This is
+% demonstrated below.
+%
+%  Tucker McClure @ The MathWorks
+%  Copyright 2012, The MathWorks, Inc.
+
+%% Clear
+close all; clear all; clc;
+
+%% Step
+% A step function is simply 1/s. We can compare the numerical results to
+% the exact results.
+
+% First, define an anonymous function for our function of s. This could
+% also be a handle to a function stored in a .m file. E.g., if I had a
+% function called my_step.m, the below could be "fun = @my_step". If this
+% doesn't look familiar, check out "Function Handles" and "Anonymous
+% Functions" in the MATLAB documentation.
+fun = @(s) 1/s;
+
+% Define the times at which we want the inverse Laplace transform
+% evaluated.
+time = [1 10 100 1000 10000]';
+
+% Just call one of the included functions. We'll try Talbot's algorithm.
+talbot_inversion(fun, time)'
+
+% We could try the Euler method as well and will get (very, very close to)
+% the same results.
+euler_inversion(fun, time)'
+
+%% Ramp
+% Let's try a simple ramp with more compact notation, defining directly in 
+% the call to |talbot_inversion| both the function and the times at which 
+% we want the function evaluated.
+talbot_inversion(@(s) 1/s^2, [1 10 100 1000 10000])'
+
+%% Exponentially Decaying Sine
+% Let's plot the results along with the theoretical values for an
+% exponentially decaying sine function.
+t = 0.05:0.05:5;
+a = 2;
+w = 2*pi;
+plot(t, exp(-a*t) .* sin(w*t), ...
+     t, euler_inversion(@(s) w/((s+a)^2+w^2), t), '.');
+xlabel('Time');
+title('f(t) = e^{-2 t} sin(\pi t) from f(s) = \pi/((s+2)^2+\pi^2)');
+legend('Known Function', 'Approximation');
+
+%% Natural Logarithm
+% We can try a natural logarithm too.
+t = 0.05:0.05:2;
+gamma = 0.5772156649015328606065120900824024;
+plot(t, log(t), ...
+     t, talbot_inversion(@(s) -1/s*(log(s) + gamma), t), '.');
+xlabel('Time');
+title('f(t) = ln(t) from f(s) = (ln(s) + \gamma)/s');
+legend('Known Function', 'Approximation');
+ 
+%% T = 0
+% Inverse Laplace transforms aren't defined for t = 0, but only t > 0.
+talbot_inversion(@(s) 1/s, 0)
+
+%% Sine and Using "M"
+% Sine oscillates and is a bit trickier on these algorithms, but it works
+% fine here. We specify an "M" parameter REPLACE_WITH_DASH_DASH a higher M yields higher
+% resolution, but if M gets too high, there can be problems. Here we'll use
+% M = 32, and pass this as the third argument to |euler_inversion|.
+t = 0.1:0.1:2*pi;
+w = pi;
+results = euler_inversion(@(s) w/(s^2+w^2), t, 32);
+plot(t, sin(w*t), ...
+     t, results, '.');
+xlabel('Time'); title('f(t) = sin(\pi t) from f(s) = \pi/(s^2+\pi^2)');
+legend('Known Function', 'Approximation');
+
+%% Cosine and Low M
+% When M isn't high enough, we see numerical problems.
+t = 0.05:0.05:3*pi;
+w = pi;
+results = talbot_inversion(@(s) s/(s^2+w^2), t, 16);
+plot(t, cos(w*t), ...
+     t, results, '.');
+axis([t(1) t(end) -2 2]);
+xlabel('Time'); title('f(t) = cos(\pi t) from f(s) = s/(s^2+\pi^2)');
+legend('Known Function', 'Approximation');
+
+
+%% Cosine and Good M Selection
+% Increasing M allows us to increase the number of periods we can compute.
+t = 0.05:0.05:3*pi;
+w = pi;
+results = talbot_inversion(@(s) s/(s^2+w^2), t, 64);
+plot(t, cos(w*t), ...
+     t, results, '.');
+axis([t(1) t(end) -2 2]);
+xlabel('Time'); title('f(t) = cos(\pi t) from f(s) = s/(s^2+\pi^2)');
+legend('Known Function', 'Approximation');
+
+%% Cosine and Large M Difficulty with Double Precision
+% We can't just set M arbitrarily high because the numerical precision
+% required is greater than what doubles can provide.
+t = 0.05:0.05:3*pi;
+w = pi;
+results = talbot_inversion(@(s) s/(s^2+w^2), t, 92);
+plot(t, cos(w*t), ...
+     t, results, '.');
+axis([t(1) t(end) -2 2]);
+xlabel('Time'); title('f(t) = cos(\pi t) from f(s) = s/(s^2+\pi^2)');
+legend('Known Function', 'Approximation');
+
+%% Cosine and Large M Accuracy with Variable Precision Arithmetic
+% Here, we need cosine calculated out very far. This is not possible with
+% doubles. Therefore, we use the symbolic implementation of Talbot's method
+% (the version that ends with "_sym") and simply specify the required M.
+% The symbolic implementations are capable of *arbitrary* precision by
+% using the "vpa" function. Note that this takes *much* longer but might be
+% the only way to solve some problems. Variable precision arithmetic (and
+% therefore this function) requires the Symbolic Toolbox.
+t = 0.1:0.1:6*pi;
+w = pi;
+tic; % Start a timer.
+results = talbot_inversion_sym(@(s) s/(s^2+w^2), t, 128);
+toc; % Stop a timer.
+plot(t, cos(w*t), ...
+     t, results, '.');
+axis([t(1) t(end) -2 2]);
+xlabel('Time'); title('f(t) = cos(\pi t) from f(s) = s/(s^2+\pi^2)');
+legend('Known Function', 'Approximation');
+
+%%
+% That's it! If you have any arbitrary function derived in |s|, you can use
+% these methods to determine its response over time.
+
+%% Appendix
+% For most realistic, difficult problems that people address, it's likely
+% that the symbolic implementations are the best resource, despite the
+% increased run time. These implementations are possible primarily due to
+% the use of the |vpa| function mentioned above. How does this work? Let's
+% suppose we want to use the binomial theorem for some very large numbers.
+% This involves large factorials. For n choose k with normal double
+% precision, we get:
+
+n = 200;
+k = 199;
+factorial(n)/(factorial(k)*factorial(n-k))
+
+%%
+% NaN! The calculation breaks down with huge products on top and bottom, 
+% resulting in numerical noise when using double precision. But instead 
+% let's make these numbers _symbolic_. Then the factorials can be carried 
+% out symbolically, allowing common terms on top and bottom to be canceled
+% out. Then we can evaluate at the very end to the desired precision. (The
+% binomial coefficients calculation here will result in an integer, so
+% we won't actually see 32 significant digits because everything after the
+% decimal will be 0), but we do get precisely 200, without round-off 
+% errors.
+
+n = sym(200);
+k = sym(199);
+vpa(factorial(n)/(factorial(k)*factorial(n-k)), 32)
+
+%%
+% That worked as expected. The |vpa| function is actually used on binomial
+% coefficients in |euler_inversion_sym| for precisely this type of exact
+% answer, albeit in a more complicated equation. Here's a snippet of 
+% |euler_inversion_sym|, showing the use of |vpa| to evaluate code handled
+% symbolically. Note that this uses vectorization, complex numbers, and 
+% even the |mod| operator, and this can all be handled symbolically 
+% gracefully!
+% 
+%     % Binominal function
+%     bnml = @(n, z) factorial(n)/(factorial(z)*factorial(n-z));
+%     
+%     xi = sym([0.5, ones(1, M), zeros(1, M-1), 2^-sym(M)]);
+%     for k = 1:M-1
+%         xi(2*M-k + 1) = xi(2*M-k + 2) + 2^-sym(M) * bnml(sym(M), sym(k));
+%     end
+%     k = sym(0:2*M); % Iteration index
+%     beta = vpa(sym(M)*log(sym(10))/3 + 1i*pi*k, P);
+%     eta  = vpa((1-mod(k, 2)*2) .* xi, P);
+
+%%
+% If you wish to understand these methods in more detail, be sure to look
+% at this great summary of these techniques.
+% 
+% Abate, Joseph, and Ward Whitt. "A Unified Framework for Numerically 
+% Inverting Laplace Transforms." INFORMS Journal of Computing, vol. 18.4 
+% (2006): 408-421. Print.
+##### SOURCE END #####
+--></body></html>
